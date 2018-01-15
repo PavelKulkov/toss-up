@@ -3,6 +3,6 @@ package models
 type Group struct {
 	Id           int
 	Teams        []Team
-	TimeTable    []string
+	TimeTable    []Timetable
 	GroupStageId int
 }

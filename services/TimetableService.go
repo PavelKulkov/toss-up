@@ -28,3 +28,30 @@ func GenerateTimeTable(group models.Group) []models.Timetable {
 	}
 	return timeTable
 }
+
+func FindResultsByGroupStageId(groupStageId int) ([]string, error) {
+	var results []string
+	rows, err := db.Query(`SELECT result FROM groups 
+				JOIN timetables t ON groups.id = t.group_id
+				WHERE group_stage_id = $1`, groupStageId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var result string
+		err := rows.Scan(&result)
+		if err == nil {
+			results = append(results, result)
+		} else {
+			return nil, err
+		}
+	}
+
+	if len(results) == 0 {
+		return nil, err
+	} else {
+		return results, err
+	}
+}

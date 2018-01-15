@@ -74,8 +74,50 @@ func FindGroupStageById(groupStageId int) (models.GroupStage, error) {
 	return groupStage, nil
 }
 
-func findGroupStageByIsFinishedFalse()  {
-	db.QueryRow(`SELECT * FROM group_stages`)
+func FindGroupStageByIsFinishedFalse() (models.GroupStage, error) {
+	var groupStage models.GroupStage
+	rows, err := db.Query(`SELECT gs.id, gs.date_start, gs.date_end, gs.name,gs.is_finished, g.id as group_id, t.name, t.description  
+		FROM group_stages gs
+  		JOIN groups g ON gs.id = g.group_stage_id
+  		JOIN teams t ON g.id = t.group_id WHERE gs.is_finished = FALSE`)
+	if err != nil {
+		return groupStage, err
+	}
+
+	for rows.Next() {
+		var tmpGroup models.Group
+		var team models.Team
+		err = rows.Scan(&groupStage.Id, &groupStage.DateStart, &groupStage.DateEnd, &groupStage.Name, &groupStage.IsFinished,
+			&tmpGroup.Id, &team.Name, &team.Description)
+		if err == nil {
+			//Пока не понимаю как тут смапить результат запроса в объект, поэтому пришлось такое сделать=(
+			if len(groupStage.Groups) == 0 {
+				tmpGroup.Teams = append(tmpGroup.Teams, team)
+				groupStage.Groups = append(groupStage.Groups, tmpGroup)
+			} else {
+				flag := true
+				for i := 0; i < len(groupStage.Groups); i++ {
+					if groupStage.Groups[i].Id == tmpGroup.Id {
+						groupStage.Groups[i].Teams = append(groupStage.Groups[i].Teams, team)
+						flag = false
+						break
+					}
+				}
+				if flag {
+					tmpGroup.Teams = append(tmpGroup.Teams, team)
+					groupStage.Groups = append(groupStage.Groups, tmpGroup)
+				}
+			}
+		} else {
+			return groupStage, err
+		}
+	}
+
+	if err != nil {
+		return groupStage, err
+	}
+
+	return groupStage, nil
 }
 
 func saveGroupStage(groupStage models.GroupStage) (models.GroupStage, error) {
