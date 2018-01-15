@@ -8,7 +8,7 @@ import (
 
 func getNewTeams() []models.Team {
 	var teams []models.Team
-	rows, err := db.Query(`SELECT * FROM teams WHERE group_id NULL`)
+	rows, err := db.Query(`SELECT * FROM teams WHERE group_id ISNULL`)
 	defer rows.Close()
 	if err == nil {
 		for rows.Next() {

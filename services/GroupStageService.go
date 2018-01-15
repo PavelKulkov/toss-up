@@ -4,12 +4,16 @@ import (
 	"log"
 	"toss-up/models"
 	"time"
+	"errors"
 )
 
 func CreateGroupStage() (models.GroupStage, error) {
+	teams := getNewTeams()
+	if len(teams) < 3 {
+		return models.GroupStage{}, errors.New("Недостаточно команд для генерации групповой стадии")
+	}
 	stage, err := saveGroupStage(models.GroupStage{DateStart: time.Now(),
 		Name: "Group Stage 1", IsFinished: false})
-	teams := getNewTeams()
 	countOfGroups, err := GenerateGroups(len(teams))
 	distributeTeams := DistributeTeams(countOfGroups, teams, stage.Id)
 	groups, err := SaveGroups(distributeTeams)
