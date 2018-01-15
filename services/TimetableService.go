@@ -22,7 +22,7 @@ func GenerateTimeTable(group models.Group) []models.Timetable {
 	var timeTable []models.Timetable
 	teams := group.Teams
 	for i := 0; i < len(teams)-1; i++ {
-		for j:=i;j< len(teams)-1; j++  {
+		for j := i; j < len(teams)-1; j++ {
 			timeTable = append(timeTable, models.Timetable{GroupId: group.Id, Match: teams[i].Name + " - " + teams[j+1].Name})
 		}
 	}
@@ -53,5 +53,39 @@ func FindResultsByGroupStageId(groupStageId int) ([]string, error) {
 		return nil, err
 	} else {
 		return results, err
+	}
+}
+
+func FindTimetableCurrentGroupStage() ([]models.Timetable, error) {
+	stage, err := FindGroupStageByIsFinishedFalse()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if stage.Name == "" {
+		return nil, err
+	}
+	rows, err := db.Query(`SELECT t.id,t.group_id, t.match, t.result FROM groups
+	  					JOIN timetables t ON groups.id = t.group_id
+	  					WHERE group_stage_id = $1`, stage.Id)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	var timetables []models.Timetable
+	for rows.Next() {
+		var timetable models.Timetable
+		err := rows.Scan(&timetable.Id, &timetable.GroupId, &timetable.Match, &timetable.Result)
+		if err == nil {
+			timetables = append(timetables, timetable)
+		} else {
+			return nil, err
+		}
+	}
+
+	if len(timetables) == 0 {
+		return nil, err
+	} else {
+		return timetables, err
 	}
 }

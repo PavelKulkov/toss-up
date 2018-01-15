@@ -38,3 +38,18 @@ func GenerateTimetable(w http.ResponseWriter, r* http.Request) {
 		}
 	}
 }
+
+func GetTimetable(w http.ResponseWriter, r* http.Request) {
+	timetables, err := services.FindTimetableCurrentGroupStage()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		if timetables == nil {
+			http.Error(w, "No current group stage or timetable not yet generated", http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(timetables)
+		}
+	}
+}
