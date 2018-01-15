@@ -1,36 +1,31 @@
 package services
 
 import (
-	"database/sql"
 	"log"
 	"toss-up/models"
 	"errors"
 )
 
-func getNewTeams() []models.Team {
+func getNewTeams() ([]models.Team, error) {
 	var teams []models.Team
 	rows, err := db.Query(`SELECT * FROM teams WHERE group_id ISNULL`)
 	defer rows.Close()
 	if err == nil {
 		for rows.Next() {
-			var id int
-			var name string
-			var description string
-			var groupId sql.NullInt64
-			err = rows.Scan(&id, &name, &description, &groupId)
+			var team models.Team
+			err = rows.Scan(&team.Id, &team.Name, &team.Description, &team.GroupId)
 			if err == nil {
-				team := models.Team{Id: id, Name: name, Description: description}
 				teams = append(teams, team)
 			} else {
-				log.Fatal(err)
-				return nil
+				log.Println(err)
+				return nil, err
 			}
 		}
 	} else {
-		log.Fatal(err)
-		return nil
+		log.Println(err)
+		return nil, err
 	}
-	return teams
+	return teams, err
 }
 
 func CreateTeam(team models.Team) (models.Team, error) {

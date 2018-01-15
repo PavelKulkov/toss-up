@@ -8,16 +8,20 @@ import (
 )
 
 func CreateGroupStage() (models.GroupStage, error) {
-	teams := getNewTeams()
+	teams, err := getNewTeams()
+	if teams == nil {
+		return models.GroupStage{}, err
+	}
 	if len(teams) < 3 {
 		return models.GroupStage{}, errors.New("Недостаточно команд для генерации групповой стадии")
 	}
 	stage, err := saveGroupStage(models.GroupStage{DateStart: time.Now(),
-		Name: "Group Stage 1", IsFinished: false})
+		Name: "Group Stage", IsFinished: false})
 	countOfGroups, err := GenerateGroups(len(teams))
 	distributeTeams := DistributeTeams(countOfGroups, teams, stage.Id)
 	groups, err := SaveGroups(distributeTeams)
 	stage.Groups = groups
+	//Проставляем командам id группы
 	for e := range groups {
 		for e1 := range groups[e].Teams {
 			groups[e].Teams[e1].GroupId = groups[e].Id
