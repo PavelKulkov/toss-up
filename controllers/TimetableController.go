@@ -5,6 +5,9 @@ import (
 	"toss-up/services"
 	"log"
 	"encoding/json"
+	"github.com/gorilla/mux"
+	"strconv"
+	"database/sql"
 )
 
 func GenerateTimetable(w http.ResponseWriter, r* http.Request) {
@@ -50,6 +53,39 @@ func GetTimetable(w http.ResponseWriter, r* http.Request) {
 		} else {
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(timetables)
+		}
+	}
+}
+
+func UpdateResultMatch(w http.ResponseWriter, r* http.Request) {
+	vars := mux.Vars(r)
+	timetableId, err := strconv.Atoi(vars["timetableId"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	type Result struct {
+		Result string `json:"result"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var result Result
+	err = decoder.Decode(&result)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	timetable, err := services.UpdateResultMatch(timetableId, sql.NullString{String:result.Result, Valid:true})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		if timetable.Match == "" {
+			http.Error(w, "Timetable not found", http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(timetable)
 		}
 	}
 }

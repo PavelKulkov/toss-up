@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 	"toss-up/models"
+	"database/sql"
 )
 
 func SaveTimetables(timetables []models.Timetable) ([]models.Timetable, error) {
@@ -88,4 +89,30 @@ func FindTimetableCurrentGroupStage() ([]models.Timetable, error) {
 	} else {
 		return timetables, err
 	}
+}
+
+func UpdateResultMatch(timetableId int, result sql.NullString) (models.Timetable, error) {
+	timetable, err := FindTimetableById(timetableId)
+	if timetable.Match == "" {
+		return timetable, err
+	}
+	_, err = db.Exec(`UPDATE timetables SET result = $1 WHERE id = $2`, result, timetableId)
+	if err != nil {
+		log.Println(err)
+		return timetable, err
+	}
+
+	timetable.Result = result
+	return timetable, err
+}
+
+func FindTimetableById(timetableId int) (models.Timetable, error) {
+	var dbTimetable models.Timetable
+	err := db.QueryRow(`SELECT * FROM timetables WHERE id = $1`, timetableId).Scan(&dbTimetable.Id, &dbTimetable.Match,
+		&dbTimetable.GroupId, &dbTimetable.Result)
+	if err != nil {
+		log.Println(err)
+		return dbTimetable, err
+	}
+	return dbTimetable, err
 }

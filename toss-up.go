@@ -17,5 +17,6 @@ func main() {
 	router.HandleFunc("/group_stages/{groupStageId}", controllers.GetGroupStage).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
 	router.HandleFunc("/timetables/generate", controllers.GenerateTimetable).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
 	router.HandleFunc("/timetables",controllers.GetTimetable ).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
+	router.HandleFunc("/timetables/{timetableId}", controllers.UpdateResultMatch).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodPut)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

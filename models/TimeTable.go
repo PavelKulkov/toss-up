@@ -6,5 +6,5 @@ type Timetable struct {
 	Id      int
 	Match   string
 	Result sql.NullString
-	GroupId int
+	GroupId sql.NullInt64
 }

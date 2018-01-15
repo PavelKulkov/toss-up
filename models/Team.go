@@ -1,8 +1,10 @@
 package models
 
+import "database/sql"
+
 type Team struct {
 	Id          int
 	Name        string
 	Description string
-	GroupId     int
+	GroupId     sql.NullInt64
 }

@@ -12,30 +12,6 @@ const (
 	MIN_COUNT_TEAMS_IN_GROUP      = 3
 )
 
-func FindGroupsByGroupStageId(groupStageId int) ([]models.Group, error) {
-	var groups []models.Group
-	rows, err := db.Query(`SELECT * FROM groups WHERE group_stage_id = $1`, groupStageId)
-	defer rows.Close()
-	if err == nil {
-		for rows.Next() {
-			var id int
-			var groupStageId int
-			err = rows.Scan(&id, &groupStageId)
-			if err == nil {
-				group := models.Group{Id: id, GroupStageId: groupStageId}
-				groups = append(groups, group)
-			} else {
-				log.Println(err)
-				return groups, err
-			}
-		}
-	} else {
-		log.Println(err)
-		return groups, err
-	}
-	return nil, nil
-}
-
 func SaveGroups(groups []models.Group) ([]models.Group, error) {
 	var err error
 	for e := range groups {
