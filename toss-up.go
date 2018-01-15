@@ -10,13 +10,14 @@ import (
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/teams", controllers.CreateTeam).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodPost)
-	router.HandleFunc("/teams/{teamId}", controllers.DeleteTeam).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodDelete)
-	router.HandleFunc("/teams/{teamId}", controllers.UpdateTeam).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodPut)
-	router.HandleFunc("/group_stages/generate", controllers.CreateGroupStage).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
-	router.HandleFunc("/group_stages/{groupStageId}", controllers.GetGroupStage).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
-	router.HandleFunc("/timetables/generate", controllers.GenerateTimetable).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
-	router.HandleFunc("/timetables",controllers.GetTimetable ).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodGet)
-	router.HandleFunc("/timetables/{timetableId}", controllers.UpdateResultMatch).Headers("Content-Type", "application/json; charset=utf-8").Methods(http.MethodPut)
+	router.Headers("Content-Type", "application/json")
+	router.HandleFunc("/teams", controllers.CreateTeam).Methods(http.MethodPost)
+	router.HandleFunc("/teams/{teamId}", controllers.DeleteTeam).Methods(http.MethodDelete)
+	router.HandleFunc("/teams/{teamId}", controllers.UpdateTeam).Methods(http.MethodPut)
+	router.HandleFunc("/group_stages/generate", controllers.CreateGroupStage).Methods(http.MethodGet)
+	router.HandleFunc("/group_stages/{groupStageId}", controllers.GetGroupStage).Methods(http.MethodGet)
+	router.HandleFunc("/timetables/generate", controllers.GenerateTimetable).Methods(http.MethodGet)
+	router.HandleFunc("/timetables",controllers.GetTimetable ).Methods(http.MethodGet)
+	router.HandleFunc("/timetables/{timetableId}", controllers.UpdateResultMatch).Methods(http.MethodPut)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

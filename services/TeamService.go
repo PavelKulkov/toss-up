@@ -32,17 +32,14 @@ func getNewTeams() []models.Team {
 	return teams
 }
 
-func SaveTeams(teams []models.Team) ([]models.Team, error) {
-	var err error
-	for e := range teams {
-		err := db.QueryRow(`INSERT INTO Teams(name, description) VALUES ($1, $2) RETURNING id`,
-			teams[e].Name, teams[e].Description).Scan(&teams[e].Id)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
+func CreateTeam(team models.Team) (models.Team, error) {
+	err := db.QueryRow(`INSERT INTO Teams(name, description) VALUES ($1, $2) RETURNING id`,
+		team.Name, team.Description).Scan(&team.Id)
+	if err != nil {
+		log.Println(err)
+		return team, err
 	}
-	return teams, err
+	return team, err
 }
 
 func DeleteTeam(teamId int) (bool, error) {

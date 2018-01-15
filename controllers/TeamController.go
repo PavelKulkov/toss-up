@@ -14,12 +14,15 @@ func CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	err := decoder.Decode(&team)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	defer r.Body.Close()
-	_, err = services.SaveTeams([]models.Team{team})
+	dbTeam, err := services.CreateTeam(team)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(team)
+	json.NewEncoder(w).Encode(dbTeam)
 }
 
 func DeleteTeam(w http.ResponseWriter, r *http.Request) {
