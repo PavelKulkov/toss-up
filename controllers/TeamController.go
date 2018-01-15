@@ -32,15 +32,15 @@ func DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	if &teamId == nil {
 		http.Error(w, "team id not found", http.StatusBadRequest)
 	}
-	result, _ := services.DeleteTeam(teamId)
-	if result {
-		w.WriteHeader(http.StatusOK)
+	err := services.DeleteTeam(teamId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func UpdateTeam(w http.ResponseWriter, r *http.Request)  {
+func UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var teamId int
 	teamId, _ = strconv.Atoi(vars["teamId"])
@@ -55,7 +55,7 @@ func UpdateTeam(w http.ResponseWriter, r *http.Request)  {
 	}
 	defer r.Body.Close()
 	updatedTeam, err := services.UpdateTeam(teamId, team)
-	if err != nil || &updatedTeam == nil{
+	if err != nil || &updatedTeam == nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"toss-up/models"
+	"errors"
 )
 
 func getNewTeams() []models.Team {
@@ -42,15 +43,17 @@ func CreateTeam(team models.Team) (models.Team, error) {
 	return team, err
 }
 
-func DeleteTeam(teamId int) (bool, error) {
-	//TODO Хотелось бы понимать когда команда просто не найдена в БД, чтобы возвращать 404
-	_, err := db.Exec(`DELETE FROM Teams where id = $1`, teamId)
-
+func DeleteTeam(teamId int) error {
+	team, err := FindById(teamId)
 	if err != nil {
-		return false, err
+		log.Println(err)
+		return err
 	}
-
-	return true, err
+	if team.Name == "" {
+		return errors.New("team not found")
+	}
+	_, err = db.Exec(`DELETE FROM Teams where id = $1`, teamId)
+	return err
 }
 
 func UpdateTeam(teamId int, team models.Team) (models.Team, error) {
