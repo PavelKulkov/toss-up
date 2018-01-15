@@ -44,7 +44,7 @@ func CreateTeam(team models.Team) (models.Team, error) {
 }
 
 func DeleteTeam(teamId int) error {
-	team, err := FindById(teamId)
+	team, err := FindTeamById(teamId)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -57,31 +57,29 @@ func DeleteTeam(teamId int) error {
 }
 
 func UpdateTeam(teamId int, team models.Team) (models.Team, error) {
-	dbTeam, err := FindById(teamId)
-	//TODO Переделать
-	if &dbTeam == nil || err != nil {
-		return dbTeam, err
-	}
-	_, err = db.Exec(`UPDATE Teams SET name = $1, description = $2, group_id = $3 WHERE id = $4`,
-		team.Name, team.Description, team.GroupId, teamId)
-
-	dbTeam.Name = team.Name
-	dbTeam.Description = team.Description
-	//if err != nil {
-	//	return Team{}, err
-	//}
-	return dbTeam, err
-}
-
-func FindById(teamId int) (models.Team, error) {
-	var dbTeam models.Team
-	var id int
-	var name string
-	var description string
-	err := db.QueryRow(`SELECT id, name, description FROM Teams WHERE id = $1`, teamId).Scan(&id, &name, &description)
+	dbTeam, err := FindTeamById(teamId)
 	if err != nil {
 		return dbTeam, err
 	}
-	dbTeam = models.Team{Id: id, Name: name, Description: description}
+	if dbTeam.Name == "" {
+		return dbTeam, errors.New("Team not found")
+	}
+	_, err = db.Exec(`UPDATE Teams SET name = $1, description = $2, group_id = $3 WHERE id = $4`,
+		team.Name, team.Description, team.GroupId, teamId)
+	if err != nil {
+		return dbTeam, err
+	}
+	dbTeam.Name = team.Name
+	dbTeam.Description = team.Description
+	return dbTeam, err
+}
+
+func FindTeamById(teamId int) (models.Team, error) {
+	var dbTeam models.Team
+	err := db.QueryRow(`SELECT id, name, description FROM Teams WHERE id = $1`, teamId).Scan(&dbTeam.Id, &dbTeam.Name,
+		&dbTeam.Description)
+	if err != nil {
+		return dbTeam, err
+	}
 	return dbTeam, err
 }

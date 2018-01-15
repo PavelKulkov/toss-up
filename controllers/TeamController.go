@@ -51,11 +51,11 @@ func UpdateTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
 	err := decoder.Decode(&team)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	defer r.Body.Close()
 	updatedTeam, err := services.UpdateTeam(teamId, team)
-	if err != nil || &updatedTeam == nil {
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
